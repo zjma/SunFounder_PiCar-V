@@ -35,13 +35,13 @@ def home(request):
 
 def run(request):
 	global SPEED, bw_status
-	debug = ''
-    if 'leftSpeed' in request.GET and 'rightSpeed' in request.GET:
-        leftSpeed = int(request.GET['leftSpeed'])
-        rightSpeed = int(request.GET['rightSpeed'])
-        dw.setStats(leftSpeed, rightSpeed)
+	print(request.GET)
+	if 'leftSpeed' in request.GET and 'rightSpeed' in request.GET:
+		leftSpeed = int(request.GET['leftSpeed'])
+		rightSpeed = int(request.GET['rightSpeed'])
+		dw.setStats(leftSpeed, rightSpeed)
 
-    if 'action' in request.GET:
+	if 'action' in request.GET:
 		action = request.GET['action']
 		# ============== Back wheels =============
 		if action == 'bwready':
