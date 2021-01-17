@@ -39,7 +39,7 @@ def run(request):
 	if 'leftSpeed' in request.GET and 'rightSpeed' in request.GET:
 		leftSpeed = int(request.GET['leftSpeed'])
 		rightSpeed = int(request.GET['rightSpeed'])
-		dw.setStats(leftSpeed, rightSpeed)
+		dw.setStatus(leftSpeed, rightSpeed)
 
 	if 'action' in request.GET:
 		action = request.GET['action']
