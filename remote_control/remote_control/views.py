@@ -37,7 +37,9 @@ def run(request):
 	global SPEED, bw_status
 	print(request.GET)
 	if 'leftSpeed' in request.GET and 'rightSpeed' in request.GET:
-		leftSpeed = int(request.GET['leftSpeed'])
+        leftSpeedParam = request.GET['leftSpeed']
+        print(type(leftSpeedParam))
+		leftSpeed = int(leftSpeedParam)
 		rightSpeed = int(request.GET['rightSpeed'])
 		dw.setStatus(leftSpeed, rightSpeed)
 
