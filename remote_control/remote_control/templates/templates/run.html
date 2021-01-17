@@ -114,8 +114,8 @@
               leftCoef = 0;
               rightCoef = 0;
           }
-          var leftSpeed = int(speedLimit*leftCoef);
-          var rightSpeed = int(speedLimit*rightCoef);
+          var leftSpeed = speedLimit*leftCoef;
+          var rightSpeed = speedLimit*rightCoef;
           var xmlHttp  = new XMLHttpRequest();
           url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?leftSpeed="+leftSpeed+"&rightSpeed="+rightSpeed;
           //document.getElementById("debug").innerHTML=url;
