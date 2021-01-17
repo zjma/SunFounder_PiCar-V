@@ -33,7 +33,7 @@
         width:  100%;
       }
       #div_streamer {
-        background: url(http://{{ host }}:8080/?action=stream) no-repeat center center; 
+        background: url(http://{{ host }}:8080/?action=stream) no-repeat center center;
         background-size: auto 90%;
         width:  100%;
         height:  100%;
@@ -78,29 +78,52 @@
       run_action('fwready');
       run_action('camready');
       var allowed = true;
+      var speedLimit = 0;
+      var W = false;
+      var A = false;
+      var S = false;
+      var D = false;
+      function sendDesiredStatus(){
+          var leftCoef;
+          var rightCoef;
+          if (W&&!S&&!A&&!D){//Forward
+              leftCoef = 1;
+              rightCoef = 1;
+          }else if (!W&&S&&!A&&!D){//Backward
+              leftCoef = -1;
+              rightCoef = -1;
+          }else if (!W&&!S&&A&&!D){//Rotate anticlockwise
+              leftCoef = -1;
+              rightCoef = 1;
+          }else if (!W&&!S&&!A&&D){//Rotate clockwise
+              leftCoef = 1;
+              rightCoef = -1;
+          }else if (W&&A&&!S&&!D){//Forward left
+              leftCoef = 0;
+              rightCoef = 1;
+          }else if (W&&!A&&!S&&D){//Forward right
+              leftCoef = 1;
+              rightCoef = 0;
+          }else if (!W&&A&&S&&!D){//Backward left
+              leftCoef = 0;
+              rightCoef = -1;
+          }else if (!W&&!A&&S&&D){//Backward right`
+              leftCoef = -1;
+              rightCoef = 0;
+          }else{
+              leftCoef = 0;
+              rightCoef = 0;
+          }
+          var leftSpeed = int(speedLimit*leftCoef);
+          var rightSpeed = int(speedLimit*rightCoef);
+          var xmlHttp  = new XMLHttpRequest();
+          url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?leftSpeed="+leftSpeed+"&rightSpeed="+rightSpeed;
+          //document.getElementById("debug").innerHTML=url;
+          xmlHttp.open( "GET", url, false );
+          xmlHttp.send( null );
+          return xmlHttp.responseText;
+      }
 
-      function run_action(value){
-        var xmlHttp  = new XMLHttpRequest();
-        var protocol  = window.location.protocol;
-        var host      = window.location.host;
-        var pathname  = window.location.pathname;
-        url = protocol + "//" + host + pathname + "?action" + "=" + value;
-        //document.getElementById("debug").innerHTML=url;
-        xmlHttp.open( "GET", url, false );
-        xmlHttp.send( null );
-        return xmlHttp.responseText;
-      }
-      function set_speed(value){
-        var xmlHttp  = new XMLHttpRequest();
-        var protocol  = window.location.protocol;
-        var host      = window.location.host;
-        var pathname  = window.location.pathname;
-        url = protocol + "//" + host + pathname + "?speed" + "=" + value;
-        //document.getElementById("debug").innerHTML=url;
-        xmlHttp.open( "GET", url, false );
-        xmlHttp.send( null );
-        return xmlHttp.responseText;
-      }
       function keydown_event(key){
         if (event.repeat != undefined) {
           allowed = !event.repeat;
@@ -122,45 +145,35 @@
         }
         switch(keychar){
           case 'W':
-            run_action('forward')
+            W = true;
             break;
           case 'S':
-            run_action('backward')
+            S = true;
             break;
           case 'A':
-            run_action('fwleft')
+            A = true;
             break;
           case 'D':
-            run_action('fwright')
-            break;
-          case '&':
-            run_action('camup')
-            break;
-          case '(':
-            run_action('camdown')
-            break;
-          case "'":
-            run_action('camright')
-            break;
-          case '%':
-            run_action('camleft')
+            D = true;
             break;
           case '1':
-            set_speed('40')
+            speedLimit = 40;
             break;
           case '2':
-            set_speed('55')
+            speedLimit = 55;
             break;
           case '3':
-            set_speed('70')
+            speedLimit = 70;
             break;
           case "4":
-            set_speed('85')
+            speedLimit = 85;
             break;
           case '5':
-            set_speed('100')
+            speedLimit = 100;
             break;
         }
+
+        sendDesiredStatus();
       }
       function keyup_event(key){
         allowed = true;
@@ -179,28 +192,16 @@
         }
         switch(keychar){
           case 'W':
-            run_action('stop')
+            W = false;
             break;
           case 'S':
-            run_action('stop')
+            S = false;
             break;
           case 'A':
-            run_action('fwstraight')
+            A = false;
             break;
           case 'D':
-            run_action('fwstraight')
-            break;
-          case '&':
-            run_action('camready')
-            break;
-          case '(':
-            run_action('camready')
-            break;
-          case "'":
-            run_action('camready')
-            break;
-          case '%':
-            run_action('camready')
+            D = false;
             break;
         }
       }

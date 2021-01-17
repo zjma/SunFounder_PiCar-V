@@ -19,14 +19,11 @@ from picar import back_wheels, front_wheels, driving_wheels
 picar.setup()
 db_file = "/home/pi/SunFounder_PiCar-V/remote_control/remote_control/driver/config"
 fw = front_wheels.Front_Wheels(debug=False, db=db_file)
-bw = back_wheels.Back_Wheels(debug=False, db=db_file)
 dw = driving_wheels.Driving_Wheels(debug=False, db=db_file)
 cam = camera.Camera(debug=False, db=db_file)
 cam.ready()
-bw.ready()
 dw.ready()
 fw.ready()
-print('All ready.')
 
 SPEED = 60
 bw_status = 0
@@ -39,23 +36,26 @@ def home(request):
 def run(request):
 	global SPEED, bw_status
 	debug = ''
-	if 'action' in request.GET:
+    if 'leftSpeed' in request.GET and 'rightSpeed' in request.GET:
+        leftSpeed = int(request.GET['leftSpeed'])
+        rightSpeed = int(request.GET['rightSpeed'])
+        dw.setStats(leftSpeed, rightSpeed)
+
+    if 'action' in request.GET:
 		action = request.GET['action']
 		# ============== Back wheels =============
 		if action == 'bwready':
-			bw.ready()
+			dw.ready()
 			bw_status = 0
 		elif action == 'forward':
-			bw.speed = SPEED
-			bw.forward()
+			dw.setStatus(SPEED,SPEED)
 			bw_status = 1
 			debug = "speed =", SPEED
 		elif action == 'backward':
-			bw.speed = SPEED
-			bw.backward()
+			dw.setStatus(-SPEED,-SPEED)
 			bw_status = -1
 		elif action == 'stop':
-			bw.stop()
+			dw.setStatus(0,0)
 			bw_status = 0
 
 		# ============== Front wheels =============
