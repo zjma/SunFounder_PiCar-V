@@ -74,15 +74,26 @@
       <br>
     </div>
     <script type="text/javascript">
+      function run_action(value){
+        var xmlHttp  = new XMLHttpRequest();
+        var protocol  = window.location.protocol;
+        var host      = window.location.host;
+        var pathname  = window.location.pathname;
+        url = protocol + "//" + host + pathname + "?action" + "=" + value;
+        //document.getElementById("debug").innerHTML=url;
+        xmlHttp.open( "GET", url, false );
+        xmlHttp.send( null );
+        return xmlHttp.responseText;
+      }
       run_action('bwready');
       run_action('fwready');
       run_action('camready');
       var allowed = true;
-      var speedLimit = 0;
-      var W = false;
-      var A = false;
-      var S = false;
-      var D = false;
+      speedLimit = 0;
+      W = false;
+      A = false;
+      S = false;
+      D = false;
       function sendDesiredStatus(){
           var leftCoef;
           var rightCoef;
