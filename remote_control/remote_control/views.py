@@ -12,19 +12,22 @@
 
 from django.shortcuts import render_to_response
 from .driver import camera, stream
-from picar import back_wheels, front_wheels
 from django.http import HttpResponse
 import picar
+from picar import back_wheels, front_wheels, driving_wheels
 
 picar.setup()
 db_file = "/home/pi/SunFounder_PiCar-V/remote_control/remote_control/driver/config"
 fw = front_wheels.Front_Wheels(debug=False, db=db_file)
 bw = back_wheels.Back_Wheels(debug=False, db=db_file)
+dw = driving_wheels.Driving_Wheels(debug=False, db=db_file)
 cam = camera.Camera(debug=False, db=db_file)
 cam.ready()
 bw.ready()
+dw.ready()
 fw.ready()
- 
+print('All ready.')
+
 SPEED = 60
 bw_status = 0
 
@@ -67,7 +70,7 @@ def run(request):
 		elif 'fwturn' in action:
 			print("turn %s" % action)
 			fw.turn(int(action.split(':')[1]))
-		
+
 		# ================ Camera =================
 		elif action == 'camready':
 			cam.ready()
@@ -78,7 +81,7 @@ def run(request):
 		elif action == 'camup':
 			cam.turn_up(20)
 		elif action == 'camdown':
-			cam.turn_down(20)	
+			cam.turn_down(20)
 	if 'speed' in request.GET:
 		speed = int(request.GET['speed'])
 		if speed < 0:
