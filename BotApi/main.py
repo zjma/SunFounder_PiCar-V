@@ -13,6 +13,12 @@ DesiredState = {
     'TiltSpeed': 0,
 }
 
+def ensureGoodAngle(x):
+    x=int(x)
+    x=min(180,x)
+    x=max(0,x)
+    return x
+
 def applier():
     tiltServo = Servo.Servo(1)
     panServo = Servo.Servo(2)
@@ -20,11 +26,11 @@ def applier():
     currentTiltDegree = 90
 
     while True:
-        currentPanDegree = ensureGoodAngle(currentPanDegree+DesiredState['PanSpeed']*60)
-        currentTiltDegree = ensureGoodAngle(currentTiltDegree+DesiredState['TiltSpeed']*60)
+        currentPanDegree = ensureGoodAngle(currentPanDegree+DesiredState['PanSpeed']*6)
+        currentTiltDegree = ensureGoodAngle(currentTiltDegree+DesiredState['TiltSpeed']*6)
         tiltServo.write(currentTiltDegree)
         panServo.write(currentPanDegree)
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 T = Thread(target=applier).start()
 
