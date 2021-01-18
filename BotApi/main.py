@@ -52,5 +52,5 @@ async def setState(request: Request):
     DesiredState = json.loads(body)
 
 @app.get("/")
-def getState(request: Request):
+def getState():
     return DesiredState
