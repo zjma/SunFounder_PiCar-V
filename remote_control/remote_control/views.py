@@ -11,7 +11,7 @@
 '''
 
 from django.shortcuts import render_to_response
-from .driver import camera, stream
+from .driver import camera
 from django.http import HttpResponse
 import picar
 from picar import back_wheels, front_wheels
@@ -26,8 +26,6 @@ fw.ready()
 
 SPEED = 60
 bw_status = 0
-
-print(stream.start())
 
 def home(request):
 	return render_to_response("base.html")
@@ -91,8 +89,8 @@ def run(request):
 		if bw_status != 0:
 			bw.speed = SPEED
 		debug = "speed =", speed
-	host = stream.get_host().decode('utf-8').split(' ')[0]
-	return render_to_response("run.html", {'host': host})
+	streamUrl = 'http://10.0.0.4:8080/?action=stream'
+	return render_to_response("run.html", {'streamUrl': streamUrl})
 
 def cali(request):
 	if 'action' in request.GET:
