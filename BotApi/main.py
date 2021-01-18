@@ -42,8 +42,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/")
-async def newState(request: Request):
+@app.put("/")
+async def setState(request: Request):
     global DesiredState
     body = await request.body()
     DesiredState = json.loads(body)
+
+@app.get("/")
+def getState(request: Request):
+    return DesiredState
