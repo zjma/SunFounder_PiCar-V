@@ -11,6 +11,8 @@ app = FastAPI()
 DesiredState = {
     'PanSpeed': 0,
     'TiltSpeed': 0,
+    'LeftWheelSpeed': 0,
+    'RightWheelSpeed': 0,
 }
 
 def ensureGoodAngle(x):
@@ -30,6 +32,7 @@ def applier():
         currentTiltDegree = ensureGoodAngle(currentTiltDegree+DesiredState['TiltSpeed']*6)
         tiltServo.write(currentTiltDegree)
         panServo.write(currentPanDegree)
+        dw.setSpeed(int(DesiredState['LeftWheelSpeed']*100),int(DesiredState['RightWheelSpeed']*100))
         time.sleep(0.01)
 
 T = Thread(target=applier).start()
