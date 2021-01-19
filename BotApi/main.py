@@ -1,13 +1,18 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 import json
+import logging
 import picar
 from picar import new_driving_wheels as dw
 from picar import Servo
+from pprint import pprint
 from threading import Thread
 import time
 
 import signal
 import sys
+
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
 picar.setup()
 
@@ -36,7 +41,11 @@ bot = MunyaCar()
 
 def apiMain():
     app = Flask(__name__)
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
+
     @app.route('/', methods=['POST'])
+    @cross_origin()
     def newTarget():
         bot.TargetLeftWheelVelocity = request.json['TargetLeftWheelVelocity']
         bot.TargetRightWheelVelocity = request.json['TargetRightWheelVelocity']
@@ -53,26 +62,28 @@ def motorOperationMain():
         dw.setSpeed(int(bot.CurrentLeftWheelVelocity*100),int(bot.CurrentRightWheelVelocity*100))
         tiltServo.write(bot.CurrentTiltAngle)
         panServo.write(bot.CurrentPanAngle)
-        time.sleep(0.01)
 
 def currentUpdaterMain():
     # Parameters.
-    DesiredMotorZeroToOneTimeInSeconds = 2.0
-    DesiredServoTurnaroundTimeInSeconds = 0.5
-    DesiredRefreshFrequency = 100
+    DesiredMotorZeroToOneTimeInSeconds = 1.0
+    DesiredServoTurnaroundTimeInSeconds = 0.1
+    DesiredRefreshFrequency = 20
     
     # Derived.
-    VelocityDiffMax = 1.0 / (DesiredRefreshFrequency * DesiredMotorZeroToOneTimeInSeconds)
+    VelocityDiffMax = 0.6 / (DesiredRefreshFrequency * DesiredMotorZeroToOneTimeInSeconds)
     AngleDiffMax = 180.0 / (DesiredRefreshFrequency * DesiredServoTurnaroundTimeInSeconds)
     
     def getNextVelocity(current, target):
+        if abs(target)>=0.4 and current*target>0 and abs(current)<0.4:
+            return 0.4*current/abs(current)
+
         diff = target-current
-        diff = min(diff, VelocityDiffMax)
-        diff = max(diff, -VelocityDiffMax)
+        diff = min(diff,VelocityDiffMax)
+        diff = max(diff,-VelocityDiffMax)
         return current+diff
 
     def getNextAngle(current, velocity):
-        next = current + velocity*6
+        next = current + velocity*AngleDiffMax
         next = min(next, 180)
         next = max(next, 0)
         return next
@@ -89,7 +100,7 @@ def targetUpdaterMain():
         if bot.LastTargetUpdateTime < time.time()-0.1:
             bot.TargetLeftWheelVelocity = 0
             bot.TargetRightWheelVelocity = 0
-        time.sleep(0.01)
+        time.sleep(0.05)
 
 if __name__=='__main__':
     apiThread = Thread(target=apiMain, daemon=True)
@@ -103,5 +114,4 @@ if __name__=='__main__':
     motorOperationThread.join()
     currentUpdaterThread.join()
     targetUpdaterThread.join()
-
 
