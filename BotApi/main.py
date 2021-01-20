@@ -32,10 +32,13 @@ class MunyaCar:
         self.TargetRightWheelVelocity = 0
         self.CurrentLeftWheelVelocity = 0
         self.CurrentRightWheelVelocity = 0
-        self.PanVelocity = 0
-        self.TiltVelocity = 0
+        self.ResettingCamera = False
+        self.PanVelocity = 0    #Respected only if ResettingCamera is False
+        self.TiltVelocity = 0   #Respected only if ResettingCamera is False
         self.CurrentTiltAngle = 90
         self.CurrentPanAngle = 90
+        self.BaselineTiltAngle = 90
+        self.BaselinePanAngle = 90
         self.LastTargetUpdateTime = 0.0
 bot = MunyaCar()
 
@@ -49,6 +52,7 @@ def apiMain():
     def newTarget():
         bot.TargetLeftWheelVelocity = request.json['TargetLeftWheelVelocity']
         bot.TargetRightWheelVelocity = request.json['TargetRightWheelVelocity']
+        bot.ResettingCamera = request.json['ResettingCamera']
         bot.PanVelocity = request.json['PanVelocity']
         bot.TiltVelocity = request.json['TiltVelocity']
         bot.LastTargetUpdateTime = time.time()
@@ -65,7 +69,7 @@ def motorOperationMain():
 
 def currentUpdaterMain():
     # Parameters.
-    DesiredMotorZeroToOneTimeInSeconds = 1.0
+    DesiredMotorZeroToOneTimeInSeconds = 0.1
     DesiredServoTurnaroundTimeInSeconds = 0.1
     DesiredRefreshFrequency = 20
     
@@ -91,8 +95,12 @@ def currentUpdaterMain():
     while not ShuttingDown:
         bot.CurrentLeftWheelVelocity = getNextVelocity(bot.CurrentLeftWheelVelocity, bot.TargetLeftWheelVelocity)
         bot.CurrentRightWheelVelocity = getNextVelocity(bot.CurrentRightWheelVelocity, bot.TargetRightWheelVelocity)
-        bot.CurrentTiltAngle = getNextAngle(bot.CurrentTiltAngle, bot.TiltVelocity)
-        bot.CurrentPanAngle = getNextAngle(bot.CurrentPanAngle, bot.PanVelocity)
+        if bot.ResettingCamera:
+            bot.CurrentTiltAngle = bot.BaselineTiltAngle
+            bot.CurrentPanAngle = bot.BaselinePanAngle
+        else:
+            bot.CurrentTiltAngle = getNextAngle(bot.CurrentTiltAngle, bot.TiltVelocity)
+            bot.CurrentPanAngle = getNextAngle(bot.CurrentPanAngle, bot.PanVelocity)
         time.sleep(1/DesiredRefreshFrequency)
 
 def targetUpdaterMain():
